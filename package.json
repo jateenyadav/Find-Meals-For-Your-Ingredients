@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "main": "script.js",
   "scripts": {
-    "start": "serve ."
+    "start": "serve .",
+    "dev": "serve . --listen 3000",
+    "build": "mkdir -p dist && cp index.html style.css script.js food.jpg dist/",
+    "preview": "serve dist --listen 3001"
   },
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A meal finder application with ingredient search and animated background",
   "dependencies": {
     "axios": "^1.11.0"
   },
