@@ -1,54 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find Meal For Your Ingredients</title>
-  <link rel="icon" href="burger.png" type="image/png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MealFinder — search thousands of recipes by ingredient, name, category or cuisine. Save favorites, scale servings, and cook with confidence." />
+  <title>MealFinder · Discover Recipes by Ingredient</title>
+  <link rel="icon" href="burger.png" type="image/png" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    referrerpolicy="no-referrer"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  
-  <div class = "container">
-    <div class = "meal-wrapper">
-      <div class = "meal-search">
-        <h2 class = "title">Find Meals For Your Ingredients</h2>
-        <blockquote class="text">Real food doesn't have ingredients, real food is ingredients.<br>
-          <cite>- XYZ</cite>
+  <!-- Animated background layers (populated by JS) -->
+  <div class="bg-gradient" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="meal-wrapper">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-logo">🍳</span>
+          <span class="brand-name">Meal<span>Finder</span></span>
+        </div>
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle theme (T)">
+          <i class="fas fa-moon"></i>
+        </button>
+      </header>
+
+      <!-- Hero / search -->
+      <section class="meal-search">
+        <h1 class="title">Find Meals For Your Ingredients</h1>
+        <blockquote class="text">
+          Real food doesn't have ingredients, real food <em>is</em> ingredients.
+          <cite>— Jamie Oliver</cite>
         </blockquote>
 
-        <div class = "meal-search-box">
-          <input type = "text" class = "search-control" placeholder="Enter an ingredient" id = "search-input">
-          <button type = "submit" class = "search-btn btn" id = "search-btn">
-            <i class = "fas fa-search"></i>
+        <div class="meal-search-box">
+          <i class="fas fa-search search-icon" aria-hidden="true"></i>
+          <input
+            type="text"
+            class="search-control"
+            placeholder="Try “chicken”, “garlic”, “pasta”…"
+            id="search-input"
+            autocomplete="off"
+            aria-label="Search meals"
+          />
+          <button type="button" class="clear-btn" id="clear-btn" aria-label="Clear search" hidden>
+            <i class="fas fa-times"></i>
+          </button>
+          <button type="submit" class="search-btn btn" id="search-btn" aria-label="Search">
+            Search
           </button>
         </div>
-      </div>
 
-      <div class = "meal-result">
-        <h2 class = "titlee">Your Search Results:</h2>
-        <div id= "meal">
-          
+        <!-- Quick actions -->
+        <div class="quick-actions">
+          <button class="ghost-btn" id="random-btn"><i class="fas fa-dice"></i> Surprise me</button>
+          <span class="kbd-hint"><kbd>/</kbd> search · <kbd>R</kbd> random · <kbd>T</kbd> theme</span>
         </div>
-      </div>
+      </section>
 
-
-      <div class = "meal-details">
-        <button type = "button" class = "btn recipe-close-btn" id = "recipe-close-btn">
-          <i class = "fas fa-times"></i>
+      <!-- Tabs -->
+      <nav class="tabs" role="tablist">
+        <button class="tab active" data-tab="results" role="tab" aria-selected="true">
+          <i class="fas fa-utensils"></i> Results <span class="badge" id="results-count">0</span>
         </button>
+        <button class="tab" data-tab="favorites" role="tab" aria-selected="false">
+          <i class="fas fa-heart"></i> Favorites <span class="badge" id="fav-count">0</span>
+        </button>
+        <button class="tab" data-tab="recent" role="tab" aria-selected="false">
+          <i class="fas fa-clock-rotate-left"></i> Recent
+        </button>
+      </nav>
 
-        
-        <div class = "meal-details-content">
-         
+      <!-- Filter chips (categories) -->
+      <section class="filters" id="filters" aria-label="Filter by category">
+        <div class="filter-row">
+          <span class="filter-label"><i class="fas fa-layer-group"></i> Categories</span>
+          <div class="chips" id="category-chips"></div>
         </div>
-      </div>
+      </section>
+
+      <!-- Results region -->
+      <section class="meal-result" aria-live="polite">
+        <div class="result-bar">
+          <h2 class="titlee" id="result-heading">Discover recipes</h2>
+          <label class="sort-wrap" hidden id="sort-wrap">
+            <span class="sort-label"><i class="fas fa-arrow-down-a-z"></i> Sort</span>
+            <select id="sort-select" aria-label="Sort results">
+              <option value="relevance">Relevance</option>
+              <option value="az">Name (A–Z)</option>
+              <option value="za">Name (Z–A)</option>
+            </select>
+          </label>
+        </div>
+        <div class="loading-icon" id="loading-icon" hidden></div>
+        <div id="meal"></div>
+      </section>
     </div>
   </div>
 
+  <!-- Recipe modal -->
+  <div class="meal-details" id="meal-details" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button type="button" class="btn recipe-close-btn" id="recipe-close-btn" aria-label="Close recipe">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="meal-details-content" id="meal-details-content"></div>
+  </div>
 
+  <!-- Modal backdrop -->
+  <div class="modal-backdrop" id="modal-backdrop" hidden></div>
 
-  <script src = "script.js"></script>
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container" aria-live="assertive"></div>
+
+  <footer class="app-footer">
+    Built with the <a href="https://www.themealdb.com" target="_blank" rel="noopener">TheMealDB</a> API ·
+    Data cached locally for favorites &amp; history
+  </footer>
+
+  <button id="back-to-top" class="back-to-top" aria-label="Back to top" title="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script src="script.js"></script>
 </body>
 </html>
